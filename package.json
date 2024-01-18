@@ -1,0 +1,16 @@
+{
+  "name": "socketio-promise",
+  "version": "1.0.0",
+  "description": "Promises Experiment",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./dist/server.js",
+    "dev": "nodemon ./dist/server.js",
+    "transpile": "tsc -w",
+    "webpack": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Clyde Mar",
+  "license": "MIT"
+}
