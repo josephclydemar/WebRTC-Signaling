@@ -2,10 +2,10 @@ const path = require('path');
 
 module.exports = {
     watch: true,
-    entry: './dist/public/js/scripts_rtc_connection.js',
+    entry: './dist/client/private/js/*',
     output: {
-        filename: 'scripts_rtc_connection.js',
-        path: path.join(__dirname, 'dist', 'public', 'js', 'bundled')
+        filename: 'index.js',
+        path: path.join(__dirname, 'dist', 'client', 'public', 'js')
     },
     mode: 'production'
 };
