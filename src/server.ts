@@ -52,13 +52,13 @@ io.on('connection', function (socket) {
 
     socket.on('rtc_sdp_offer', function (data: any): void {
         const { sendTo } = data;
-        socket.to(sendTo).emit('rtc_sdp_pass', data);
+        socket.to(sendTo).emit('rtc_sdp_offer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
     });
 
     socket.on('rtc_sdp_answer', function (data: any): void {
         const { sendTo } = data;
-        socket.to(sendTo).emit('rtc_sdp_pass', data);
+        socket.to(sendTo).emit('rtc_sdp_answer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
     });
 

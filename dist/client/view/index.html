@@ -14,27 +14,40 @@
   </head>
   <body>
     <h1>WebRTC Signaling Experiment</h1>
-    <h2 id="my-id"></h2>
+    <h4 id="my-id"></h4>
     <div>
       <button id="show-id">Show ID</button>
     </div>
     <div>
-      <input type="text" name="message-box" id="message-input-box" />
-      <button id="send-message-button">Send Message</button>
+      <div class="sdp-container">
+        <h4>Local SDP</h4>
+        <h5 id="sdp-local-sender"></h5>
+        <h5 id="sdp-local-type"></h5>
+        <h5 id="sdp-local"></h5>
+      </div>
+      <div class="sdp-container">
+        <h4>Remote SDP</h4>
+        <h5 id="sdp-remote-sender"></h5>
+        <h5 id="sdp-remote-type"></h5>
+        <h5 id="sdp-remote"></h5>
+      </div>
     </div>
-    <div>
-      <h4 id="sdp-sender"></h4>
-      <h4 id="sdp-type"></h4>
-      <h4 id="sdp"></h4>
-      <button id="send-sdp-answer-button">Send SDP Answer</button>
-    </div>
-    <div>
+    <div class="table-containers">
       <table>
         <thead>
           <th>Client ID</th>
           <th>Offer SDP</th>
         </thead>
         <tbody id="other-clients"></tbody>
+      </table>
+    </div>
+    <div class="table-containers">
+      <table>
+        <thead>
+          <th>Client ID</th>
+          <th>Remote Peer ICE</th>
+        </thead>
+        <tbody id="remote-peer-ice"></tbody>
       </table>
     </div>
   </body>

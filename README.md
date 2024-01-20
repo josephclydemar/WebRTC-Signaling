@@ -1,2 +1,2 @@
 # WebRTC Signaling Experiment
-Experimenting about Signaling Server.
+WebRTC Signaling server experiment.

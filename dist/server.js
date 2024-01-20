@@ -38,12 +38,12 @@ io.on('connection', function (socket) {
     });
     socket.on('rtc_sdp_offer', function (data) {
         const { sendTo } = data;
-        socket.to(sendTo).emit('rtc_sdp_pass', data);
+        socket.to(sendTo).emit('rtc_sdp_offer_pass', data);
         console.log(`${(0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${(0, uuid_1.v4)()}\t`, data);
     });
     socket.on('rtc_sdp_answer', function (data) {
         const { sendTo } = data;
-        socket.to(sendTo).emit('rtc_sdp_pass', data);
+        socket.to(sendTo).emit('rtc_sdp_answer_pass', data);
         console.log(`${(0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${(0, uuid_1.v4)()}\t`, data);
     });
     socket.on('rtc_ice_offer', function (data) {

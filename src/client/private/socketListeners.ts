@@ -1,15 +1,27 @@
 import * as io from 'socket.io-client';
-import { resetOtherClientsList } from './domControllers';
+import { v4 } from 'uuid';
+import { SDP } from './types';
+import { resetOtherClientsList, setLocalSDP, setRemoteSDP } from './domControllers';
 
-const socket = io.connect('http://192.168.1.19:8600');
+const socket: io.Socket = io.connect('http://192.168.1.19:8600');
 
-socket.on('rtc_sdp_pass', function (data: any) {
-    const receivedSDP: HTMLHeadingElement = document.getElementById('sdp') as HTMLHeadingElement;
-    const SDPSender: HTMLHeadingElement = document.getElementById('sdp-sender') as HTMLHeadingElement;
-    const SDPType: HTMLHeadingElement = document.getElementById('sdp-type') as HTMLHeadingElement;
-    SDPSender.textContent = `Sender: ${data['sendFrom']}`;
-    SDPType.textContent = `Type: ${data['type']}`;
-    receivedSDP.textContent = `SDP: ${data['sdp']}`;
+// Receives an Offer from a remote peer
+socket.on('rtc_sdp_offer_pass', function (data: any): void {
+    const { sendFrom, type, sdp } = data;
+    const answerSDP: SDP = { sendFrom: socket.id as string, sendTo: sendFrom, type: 'answer', sdp: v4() };
+    setLocalSDP(answerSDP.sendTo, answerSDP.type, answerSDP.sdp);
+    setRemoteSDP(sendFrom, type, sdp);
+    setTimeout(function (): void {
+        socket.emit('rtc_sdp_answer', answerSDP);
+    }, 4500);
+    console.log(data);
+});
+
+// Receives an Answer from a remote peer
+socket.on('rtc_sdp_answer_pass', function (data: any): void {
+    const { sendFrom, type, sdp } = data;
+    setRemoteSDP(sendFrom, type, sdp);
+    socket.emit('rtc_sdp_answer_received_confirmation', 'sdp-answer-received');
     console.log(data);
 });
 
