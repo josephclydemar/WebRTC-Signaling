@@ -6,10 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const socket_io_1 = require("socket.io");
 const path_1 = __importDefault(require("path"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const date_fns_1 = require("date-fns");
 const uuid_1 = require("uuid");
+dotenv_1.default.config();
 const app = (0, express_1.default)();
-const PORT = 8600;
+const PORT = process.env.SERVER_PORT;
 let clients = [];
 app.use(express_1.default.static(path_1.default.join(__dirname, 'client', 'public')));
 app.get('/', function (req, res) {

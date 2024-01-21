@@ -4,7 +4,11 @@ import { ICE, SDP } from './typesClient';
 import { resetOtherClientsList, setLocalSDP, setRemotePeerICEList, setRemoteSDP } from './domControllers';
 import { generateICECandidates } from './rtcMethods';
 
-const socket: io.Socket = io.connect('http://192.168.1.19:8600');
+
+const DEVELOPMENT_HOSTNAME = 'http://192.168.1.19:8600';
+// const PRODUCTION_HOSTNAME = '';
+
+const socket: io.Socket = io.connect(DEVELOPMENT_HOSTNAME);
 
 // Receives an Offer from a remote peer
 socket.on('rtc_sdp_offer_pass', function (data: SDP): void {

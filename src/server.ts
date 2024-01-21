@@ -1,12 +1,15 @@
 import express, { Express, Request, Response } from 'express';
 import { Server } from 'socket.io';
 import path from 'path';
+import dotenv from 'dotenv';
 import { format } from 'date-fns';
 import { v4 } from 'uuid';
 import { SDP, ICE } from './typesServer';
 
+dotenv.config();
+
 const app: Express = express();
-const PORT: number = 8600;
+const PORT: string = process.env.SERVER_PORT as string;
 
 let clients: string[] = [];
 

@@ -22,12 +22,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.socket = void 0;
 const io = __importStar(require("socket.io-client"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const uuid_1 = require("uuid");
 const domControllers_1 = require("./domControllers");
 const rtcMethods_1 = require("./rtcMethods");
+dotenv_1.default.config();
+console.log('ahahhhhhhhhhhhhhh');
+const HOSTNAME = process.env.SERVER_HOSTNAME_DEVELOPMENT;
+console.log('HOSTNAME -->', HOSTNAME);
 const socket = io.connect('http://192.168.1.19:8600');
 exports.socket = socket;
 socket.on('rtc_sdp_offer_pass', function (data) {
