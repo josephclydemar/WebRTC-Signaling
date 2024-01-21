@@ -8,4 +8,5 @@ module.exports = {
     path: path.join(__dirname, "dist", "client", "public", "js"),
   },
   mode: "production",
+  stats: "errors-warnings"
 };

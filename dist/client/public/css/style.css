@@ -38,3 +38,12 @@ td {
   width: 45vw;
   height: 60vh;
 }
+
+.video-wrapper {
+  display: inline-block;
+  width: 45vw;
+}
+
+.video-player {
+  width: 40vw;
+}

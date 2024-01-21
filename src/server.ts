@@ -4,7 +4,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { format } from 'date-fns';
 import { v4 } from 'uuid';
-import { SDP, ICE } from './typesServer';
+import { SDP, ICECollection } from './typesServer';
 
 dotenv.config();
 
@@ -71,13 +71,13 @@ io.on('connection', function (socket) {
         socket.to(sendTo).emit('rtc_sdp_answer_received_confirmation', data);
     });
 
-    socket.on('rtc_ice_offer', function (data: ICE): void {
+    socket.on('rtc_ice_offer', function (data: ICECollection): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_ice_offer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
     });
 
-    socket.on('rtc_ice_answer', function (data: ICE): void {
+    socket.on('rtc_ice_answer', function (data: ICECollection): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_ice_answer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);

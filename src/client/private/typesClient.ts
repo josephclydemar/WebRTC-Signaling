@@ -5,11 +5,11 @@ type SDP = {
     sdp: string;
 };
 
-type ICE = {
+type ICECollection = {
     sendFrom: string;
     sendTo: string;
     type: string;
     ice: string[];
 };
 
-export { SDP, ICE };
+export { SDP, ICECollection };

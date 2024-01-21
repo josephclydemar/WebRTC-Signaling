@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { SDP, ICE } from './typesClient';
+import { SDP, ICECollection } from './typesClient';
 import { socket } from './socketListeners';
 
 function resetOtherClientsList(otherClients: string[]): void {
@@ -52,7 +52,7 @@ function setLocalSDP(sendTo: string, type: string, sdp: string): void {
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
 
-function setRemotePeerICEList(remoteICE: ICE): void {
+function setRemotePeerICEList(remoteICE: ICECollection): void {
     const remotePeerICEList: HTMLTableSectionElement = document.getElementById('remote-peer-ice') as HTMLTableSectionElement;
     remotePeerICEList.innerHTML = '';
     for (let i: number = 0; i < remoteICE.ice.length; i++) {

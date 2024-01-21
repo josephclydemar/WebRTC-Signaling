@@ -1,9 +1,8 @@
 import * as io from 'socket.io-client';
 import { v4 } from 'uuid';
-import { ICE, SDP } from './typesClient';
+import { SDP, ICECollection } from './typesClient';
 import { resetOtherClientsList, setLocalSDP, setRemotePeerICEList, setRemoteSDP } from './domControllers';
 import { generateICECandidates } from './rtcMethods';
-
 
 const DEVELOPMENT_HOSTNAME = 'http://192.168.1.19:8600';
 // const PRODUCTION_HOSTNAME = '';
@@ -27,7 +26,7 @@ socket.on('rtc_sdp_answer_pass', function (data: SDP): void {
     const { sendFrom, type, sdp } = data;
     setRemoteSDP(sendFrom, type, sdp);
     socket.emit('rtc_sdp_answer_received_confirmation', { sendFrom: socket.id, sendTo: sendFrom, message: 'sdp-answer-received' });
-    const localICECandidates: ICE = {
+    const localICECandidates: ICECollection = {
         sendFrom: socket.id as string,
         sendTo: sendFrom,
         type: 'offer',
@@ -37,10 +36,11 @@ socket.on('rtc_sdp_answer_pass', function (data: SDP): void {
     console.log(data);
 });
 
+// Receive offerer's confirmation that answer SDP is received
 socket.on('rtc_sdp_answer_received_confirmation', function (data: any): void {
     const { sendFrom, message } = data;
     if (message === 'sdp-answer-received') {
-        const localICECandidates: ICE = {
+        const localICECandidates: ICECollection = {
             sendFrom: socket.id as string,
             sendTo: sendFrom,
             type: 'answer',
@@ -50,13 +50,15 @@ socket.on('rtc_sdp_answer_received_confirmation', function (data: any): void {
     }
 });
 
-socket.on('rtc_ice_offer_pass', function (data: ICE): void {
+// Receive ICE Candidates from offerer remote peer
+socket.on('rtc_ice_offer_pass', function (data: ICECollection): void {
     // const { sendFrom, ice } = data;
     setRemotePeerICEList(data);
     console.log(data);
 });
 
-socket.on('rtc_ice_answer_pass', function (data: ICE): void {
+// Receive ICE Candidates from answerer remote peer
+socket.on('rtc_ice_answer_pass', function (data: ICECollection): void {
     // const { sendFrom, ice } = data;
     setRemotePeerICEList(data);
     console.log(data);
