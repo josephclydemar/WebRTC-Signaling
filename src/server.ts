@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { format } from 'date-fns';
 import { v4 } from 'uuid';
+import { SDP, ICE } from './typesServer';
 
 const app: Express = express();
 const PORT: number = 8600;
@@ -46,31 +47,36 @@ io.on('connection', function (socket) {
 
     socket.broadcast.emit('new_client', clients);
 
-    socket.on('message', function (data: any): void {
+    socket.on('message', function (data: string): void {
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\tClient ${socket.id} message: ${data}`);
     });
 
-    socket.on('rtc_sdp_offer', function (data: any): void {
+    socket.on('rtc_sdp_offer', function (data: SDP): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_sdp_offer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
     });
 
-    socket.on('rtc_sdp_answer', function (data: any): void {
+    socket.on('rtc_sdp_answer', function (data: SDP): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_sdp_answer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
     });
 
-    socket.on('rtc_ice_offer', function (data: any): void {
+    socket.on('rtc_sdp_answer_received_confirmation', function (data: any): void {
         const { sendTo } = data;
-        socket.to(sendTo).emit('rtc_ice_pass', data);
+        socket.to(sendTo).emit('rtc_sdp_answer_received_confirmation', data);
+    });
+
+    socket.on('rtc_ice_offer', function (data: ICE): void {
+        const { sendTo } = data;
+        socket.to(sendTo).emit('rtc_ice_offer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
     });
 
-    socket.on('rtc_ice_answer', function (data: any): void {
+    socket.on('rtc_ice_answer', function (data: ICE): void {
         const { sendTo } = data;
-        socket.to(sendTo).emit('rtc_ice_pass', data);
+        socket.to(sendTo).emit('rtc_ice_answer_pass', data);
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
     });
 

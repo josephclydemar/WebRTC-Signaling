@@ -27,6 +27,7 @@ exports.socket = void 0;
 const io = __importStar(require("socket.io-client"));
 const uuid_1 = require("uuid");
 const domControllers_1 = require("./domControllers");
+const rtcMethods_1 = require("./rtcMethods");
 const socket = io.connect('http://192.168.1.19:8600');
 exports.socket = socket;
 socket.on('rtc_sdp_offer_pass', function (data) {
@@ -36,21 +37,46 @@ socket.on('rtc_sdp_offer_pass', function (data) {
     (0, domControllers_1.setRemoteSDP)(sendFrom, type, sdp);
     setTimeout(function () {
         socket.emit('rtc_sdp_answer', answerSDP);
-    }, 4500);
+    }, 2500);
     console.log(data);
 });
 socket.on('rtc_sdp_answer_pass', function (data) {
     const { sendFrom, type, sdp } = data;
     (0, domControllers_1.setRemoteSDP)(sendFrom, type, sdp);
-    socket.emit('rtc_sdp_answer_received_confirmation', 'sdp-answer-received');
+    socket.emit('rtc_sdp_answer_received_confirmation', { sendFrom: socket.id, sendTo: sendFrom, message: 'sdp-answer-received' });
+    const localICECandidates = {
+        sendFrom: socket.id,
+        sendTo: sendFrom,
+        type: 'offer',
+        ice: (0, rtcMethods_1.generateICECandidates)(),
+    };
+    socket.emit('rtc_ice_offer', localICECandidates);
+    console.log(data);
+});
+socket.on('rtc_sdp_answer_received_confirmation', function (data) {
+    const { sendFrom, message } = data;
+    if (message === 'sdp-answer-received') {
+        const localICECandidates = {
+            sendFrom: socket.id,
+            sendTo: sendFrom,
+            type: 'answer',
+            ice: (0, rtcMethods_1.generateICECandidates)(),
+        };
+        socket.emit('rtc_ice_answer', localICECandidates);
+    }
+});
+socket.on('rtc_ice_offer_pass', function (data) {
+    (0, domControllers_1.setRemotePeerICEList)(data);
+    console.log(data);
+});
+socket.on('rtc_ice_answer_pass', function (data) {
+    (0, domControllers_1.setRemotePeerICEList)(data);
     console.log(data);
 });
 socket.on('for_me', function (data) {
-    console.log(data);
     (0, domControllers_1.resetOtherClientsList)(data);
 });
 socket.on('new_client', function (data) {
-    console.log(data);
     (0, domControllers_1.resetOtherClientsList)(data.filter(function (item) {
         return item !== socket.id;
     }));

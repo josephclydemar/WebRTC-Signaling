@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { SDP, ICE } from './types';
+import { SDP, ICE } from './typesClient';
 import { socket } from './socketListeners';
 
 function resetOtherClientsList(otherClients: string[]): void {
@@ -22,7 +22,7 @@ function resetOtherClientsList(otherClients: string[]): void {
             setLocalSDP(offerSDP.sendTo, offerSDP.type, offerSDP.sdp);
             setTimeout(function (): void {
                 socket.emit('rtc_sdp_offer', offerSDP);
-            }, 4500);
+            }, 2500);
         };
 
         tdID.textContent = otherClients[i];
@@ -38,7 +38,7 @@ function setRemoteSDP(sendFrom: string, type: string, sdp: string): void {
     const receivedSDP: HTMLHeadingElement = document.getElementById('sdp-remote') as HTMLHeadingElement;
     const SDPSender: HTMLHeadingElement = document.getElementById('sdp-remote-sender') as HTMLHeadingElement;
     const SDPType: HTMLHeadingElement = document.getElementById('sdp-remote-type') as HTMLHeadingElement;
-    SDPSender.textContent = `Sender: ${sendFrom}`;
+    SDPSender.textContent = `Sender ID: ${sendFrom}`;
     SDPType.textContent = `Type: ${type}`;
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
@@ -47,21 +47,21 @@ function setLocalSDP(sendTo: string, type: string, sdp: string): void {
     const receivedSDP: HTMLHeadingElement = document.getElementById('sdp-local') as HTMLHeadingElement;
     const SDPSender: HTMLHeadingElement = document.getElementById('sdp-local-sender') as HTMLHeadingElement;
     const SDPType: HTMLHeadingElement = document.getElementById('sdp-local-type') as HTMLHeadingElement;
-    SDPSender.textContent = `Receiver: ${sendTo}`;
+    SDPSender.textContent = `Receiver ID: ${sendTo}`;
     SDPType.textContent = `Type: ${type}`;
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
 
-function setRemotePeerICEList(ice: ICE[]): void {
+function setRemotePeerICEList(remoteICE: ICE): void {
     const remotePeerICEList: HTMLTableSectionElement = document.getElementById('remote-peer-ice') as HTMLTableSectionElement;
     remotePeerICEList.innerHTML = '';
-    for (let i: number = 0; i < ice.length; i++) {
+    for (let i: number = 0; i < remoteICE.ice.length; i++) {
         let tr: HTMLTableRowElement = document.createElement('tr');
         let tdID: HTMLTableCellElement = document.createElement('td');
         let tdICE: HTMLTableCellElement = document.createElement('td');
 
-        tdID.textContent = ice[i].sendFrom;
-        tdICE.textContent = ice[i].ice;
+        tdID.textContent = remoteICE.sendFrom;
+        tdICE.textContent = remoteICE.ice[i];
 
         tr.appendChild(tdID);
         tr.appendChild(tdICE);

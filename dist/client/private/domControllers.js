@@ -22,7 +22,7 @@ function resetOtherClientsList(otherClients) {
             setLocalSDP(offerSDP.sendTo, offerSDP.type, offerSDP.sdp);
             setTimeout(function () {
                 socketListeners_1.socket.emit('rtc_sdp_offer', offerSDP);
-            }, 4500);
+            }, 2500);
         };
         tdID.textContent = otherClients[i];
         tdCall.appendChild(callButton);
@@ -36,7 +36,7 @@ function setRemoteSDP(sendFrom, type, sdp) {
     const receivedSDP = document.getElementById('sdp-remote');
     const SDPSender = document.getElementById('sdp-remote-sender');
     const SDPType = document.getElementById('sdp-remote-type');
-    SDPSender.textContent = `Sender: ${sendFrom}`;
+    SDPSender.textContent = `Sender ID: ${sendFrom}`;
     SDPType.textContent = `Type: ${type}`;
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
@@ -45,20 +45,20 @@ function setLocalSDP(sendTo, type, sdp) {
     const receivedSDP = document.getElementById('sdp-local');
     const SDPSender = document.getElementById('sdp-local-sender');
     const SDPType = document.getElementById('sdp-local-type');
-    SDPSender.textContent = `Receiver: ${sendTo}`;
+    SDPSender.textContent = `Receiver ID: ${sendTo}`;
     SDPType.textContent = `Type: ${type}`;
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
 exports.setLocalSDP = setLocalSDP;
-function setRemotePeerICEList(ice) {
+function setRemotePeerICEList(remoteICE) {
     const remotePeerICEList = document.getElementById('remote-peer-ice');
     remotePeerICEList.innerHTML = '';
-    for (let i = 0; i < ice.length; i++) {
+    for (let i = 0; i < remoteICE.ice.length; i++) {
         let tr = document.createElement('tr');
         let tdID = document.createElement('td');
         let tdICE = document.createElement('td');
-        tdID.textContent = ice[i].sendFrom;
-        tdICE.textContent = ice[i].ice;
+        tdID.textContent = remoteICE.sendFrom;
+        tdICE.textContent = remoteICE.ice[i];
         tr.appendChild(tdID);
         tr.appendChild(tdICE);
         remotePeerICEList.appendChild(tr);

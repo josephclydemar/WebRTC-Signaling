@@ -9,7 +9,7 @@ type ICE = {
     sendFrom: string;
     sendTo: string;
     type: string;
-    ice: string;
+    ice: string[];
 };
 
 export { SDP, ICE };

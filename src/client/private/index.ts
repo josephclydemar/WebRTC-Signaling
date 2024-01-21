@@ -4,5 +4,5 @@ const showSocketIDButton: HTMLButtonElement = document.getElementById('show-id')
 
 showSocketIDButton.onclick = function (): void {
     const mySocketId: HTMLHeadingElement = document.getElementById('my-id') as HTMLHeadingElement;
-    mySocketId.textContent = socket.id as string;
+    mySocketId.textContent = `My ID: ${socket.id}`;
 };

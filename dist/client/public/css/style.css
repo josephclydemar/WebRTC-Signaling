@@ -35,6 +35,6 @@ td {
 
 .table-containers {
   display: inline-block;
-  width: 50vw;
-  background-color: #919191;
+  width: 45vw;
+  height: 60vh;
 }
