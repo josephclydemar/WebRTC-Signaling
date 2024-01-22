@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectICECandidates = exports.createAnswerSDP = exports.createOfferSDP = void 0;
-const uuid_1 = require("uuid");
+exports.collectICECandidates = exports.createAnswerSDP = exports.createOfferSDP = exports.isIceCandidatesGatheringComplete = exports.iceCandidatesCollection = exports.rtcPeerConnection = void 0;
 const servers = {
     iceServers: [
         {
@@ -9,10 +8,17 @@ const servers = {
         },
     ],
 };
-async function createOfferSDP(localMediaStream) {
-    let rtcPeerConnection = new RTCPeerConnection(servers);
+const rtcPeerConnection = createRTCPeerConnection();
+exports.rtcPeerConnection = rtcPeerConnection;
+let iceCandidatesCollection = [];
+exports.iceCandidatesCollection = iceCandidatesCollection;
+let isIceCandidatesGatheringComplete = false;
+exports.isIceCandidatesGatheringComplete = isIceCandidatesGatheringComplete;
+function createRTCPeerConnection() {
+    return new RTCPeerConnection(servers);
+}
+async function createOfferSDP(localMediaStream, rtcPeerConnection) {
     let offerSDP;
-    let iceCandidates = [];
     localMediaStream.getTracks().forEach(function (track) {
         rtcPeerConnection.addTrack(track, localMediaStream);
     });
@@ -20,24 +26,61 @@ async function createOfferSDP(localMediaStream) {
         offerSDP = (await rtcPeerConnection.createOffer());
         console.log('OFFER -->', offerSDP);
         await rtcPeerConnection.setLocalDescription(offerSDP);
+        rtcPeerConnection.onicecandidate = function (iceEvent) {
+            console.log('Local ICE->', iceCandidatesCollection);
+            if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
+                iceCandidatesCollection.push(iceEvent.candidate);
+            }
+            else {
+                exports.isIceCandidatesGatheringComplete = isIceCandidatesGatheringComplete = true;
+            }
+        };
         return offerSDP;
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         return null;
     }
 }
 exports.createOfferSDP = createOfferSDP;
-function createAnswerSDP() {
-    return (0, uuid_1.v4)();
+async function createAnswerSDP(localMediaStream, rtcPeerConnection, remoteOfferSDP) {
+    let answerSDP;
+    localMediaStream.getTracks().forEach(function (track) {
+        rtcPeerConnection.addTrack(track, localMediaStream);
+    });
+    try {
+        await rtcPeerConnection.setRemoteDescription(remoteOfferSDP);
+        answerSDP = (await rtcPeerConnection.createAnswer({}));
+        await rtcPeerConnection.setLocalDescription(answerSDP);
+        rtcPeerConnection.onicecandidate = function (iceEvent) {
+            console.log('Local ICE->', iceCandidatesCollection);
+            if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
+                iceCandidatesCollection.push(iceEvent.candidate);
+            }
+            else {
+                exports.isIceCandidatesGatheringComplete = isIceCandidatesGatheringComplete = true;
+            }
+        };
+        return answerSDP;
+    }
+    catch (err) {
+        console.error(err);
+        return null;
+    }
 }
 exports.createAnswerSDP = createAnswerSDP;
-async function collectICECandidates(rtcPeerConnection, iceCandidatesCollection) {
-    rtcPeerConnection.onicecandidate = function (iceEvent) {
-        if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
-            iceCandidatesCollection.push(iceEvent.candidate);
-            console.log('ICE -->', iceEvent);
-        }
-    };
+function collectICECandidates(rtcPeerConnection) {
+    return new Promise(function (resolve) {
+        let iceCandidatesCollection = [];
+        rtcPeerConnection.onicecandidate = function (iceEvent) {
+            console.log('Local ICE->', iceEvent);
+            if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
+                iceCandidatesCollection.push(iceEvent.candidate);
+            }
+            else {
+                resolve(iceCandidatesCollection);
+            }
+        };
+    });
 }
 exports.collectICECandidates = collectICECandidates;

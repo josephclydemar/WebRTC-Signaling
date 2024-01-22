@@ -1,8 +1,8 @@
-async function getLocalMediaStream(): Promise<MediaStream> {
+async function getLocalMediaStream(getVideo: boolean, getAudio: boolean): Promise<MediaStream> {
     const localVideo: HTMLVideoElement = document.getElementById('local-video') as HTMLVideoElement;
     let localMediaStream: MediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false,
+        video: getVideo,
+        audio: getAudio,
     });
     localVideo.srcObject = localMediaStream;
     return localMediaStream;

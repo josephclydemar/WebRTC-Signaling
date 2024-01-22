@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setRemotePeerICEList = exports.setRemoteSDP = exports.setLocalSDP = exports.resetOtherClientsList = void 0;
-const uuid_1 = require("uuid");
+exports.setRemotePeerICEListInDOM = exports.setRemoteSDPInDom = exports.setLocalSDPInDOM = exports.resetOtherClientsList = void 0;
 const socketListeners_1 = require("./socketListeners");
 const rtcMethods_1 = require("./rtcMethods");
 const userMedia_1 = require("./userMedia");
@@ -13,20 +12,19 @@ function resetOtherClientsList(otherClients) {
         let tdID = document.createElement('td');
         let tdCall = document.createElement('td');
         let callButton = document.createElement('button');
+        callButton.classList.add('my-peers');
         callButton.textContent = 'Call';
         callButton.onclick = async function () {
-            let localStream = await (0, userMedia_1.getLocalMediaStream)();
-            await (0, rtcMethods_1.createOfferSDP)(localStream);
+            let localStream = await (0, userMedia_1.getLocalMediaStream)(true, false);
+            const createdOffer = (await (0, rtcMethods_1.createOfferSDP)(localStream, rtcMethods_1.rtcPeerConnection));
             const offerSDP = {
                 sendFrom: socketListeners_1.socket.id,
                 sendTo: otherClients[i],
                 type: 'offer',
-                sdp: (0, uuid_1.v4)(),
+                sdp: createdOffer,
             };
-            setLocalSDP(offerSDP.sendTo, offerSDP.type, offerSDP.sdp);
-            setTimeout(function () {
-                socketListeners_1.socket.emit('rtc_sdp_offer', offerSDP);
-            }, 2500);
+            setLocalSDPInDOM(offerSDP.sendTo, offerSDP.type, offerSDP.sdp.sdp);
+            socketListeners_1.socket.emit('rtc_sdp_offer', offerSDP);
         };
         tdID.textContent = otherClients[i];
         tdCall.appendChild(callButton);
@@ -36,7 +34,7 @@ function resetOtherClientsList(otherClients) {
     }
 }
 exports.resetOtherClientsList = resetOtherClientsList;
-function setRemoteSDP(sendFrom, type, sdp) {
+function setRemoteSDPInDom(sendFrom, type, sdp) {
     const receivedSDP = document.getElementById('sdp-remote');
     const SDPSender = document.getElementById('sdp-remote-sender');
     const SDPType = document.getElementById('sdp-remote-type');
@@ -44,8 +42,8 @@ function setRemoteSDP(sendFrom, type, sdp) {
     SDPType.textContent = `Type: ${type}`;
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
-exports.setRemoteSDP = setRemoteSDP;
-function setLocalSDP(sendTo, type, sdp) {
+exports.setRemoteSDPInDom = setRemoteSDPInDom;
+function setLocalSDPInDOM(sendTo, type, sdp) {
     const receivedSDP = document.getElementById('sdp-local');
     const SDPSender = document.getElementById('sdp-local-sender');
     const SDPType = document.getElementById('sdp-local-type');
@@ -53,19 +51,22 @@ function setLocalSDP(sendTo, type, sdp) {
     SDPType.textContent = `Type: ${type}`;
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
-exports.setLocalSDP = setLocalSDP;
-function setRemotePeerICEList(remoteICE) {
+exports.setLocalSDPInDOM = setLocalSDPInDOM;
+function setRemotePeerICEListInDOM(remoteICE) {
     const remotePeerICEList = document.getElementById('remote-peer-ice');
     remotePeerICEList.innerHTML = '';
     for (let i = 0; i < remoteICE.ice.length; i++) {
         let tr = document.createElement('tr');
         let tdID = document.createElement('td');
+        let tdType = document.createElement('td');
         let tdICE = document.createElement('td');
         tdID.textContent = remoteICE.sendFrom;
-        tdICE.textContent = remoteICE.ice[i];
+        tdType.textContent = remoteICE.type;
+        tdICE.textContent = remoteICE.ice[i].candidate;
         tr.appendChild(tdID);
+        tr.appendChild(tdType);
         tr.appendChild(tdICE);
         remotePeerICEList.appendChild(tr);
     }
 }
-exports.setRemotePeerICEList = setRemotePeerICEList;
+exports.setRemotePeerICEListInDOM = setRemotePeerICEListInDOM;

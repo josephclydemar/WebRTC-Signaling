@@ -25,52 +25,48 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.socket = void 0;
 const io = __importStar(require("socket.io-client"));
-const uuid_1 = require("uuid");
 const domControllers_1 = require("./domControllers");
-const DEVELOPMENT_HOSTNAME = 'https://192.168.1.19:8600';
+const userMedia_1 = require("./userMedia");
+const rtcMethods_1 = require("./rtcMethods");
+const DEVELOPMENT_HOSTNAME = 'https://192.168.1.2:8600';
 const socket = io.connect(DEVELOPMENT_HOSTNAME);
 exports.socket = socket;
-socket.on('rtc_sdp_offer_pass', function (data) {
+socket.on('rtc_sdp_offer_pass', async function (data) {
     const { sendFrom, type, sdp } = data;
-    const answerSDP = { sendFrom: socket.id, sendTo: sendFrom, type: 'answer', sdp: (0, uuid_1.v4)() };
-    (0, domControllers_1.setLocalSDP)(answerSDP.sendTo, answerSDP.type, answerSDP.sdp);
-    (0, domControllers_1.setRemoteSDP)(sendFrom, type, sdp);
-    setTimeout(function () {
-        socket.emit('rtc_sdp_answer', answerSDP);
-    }, 2500);
+    let localStream = await (0, userMedia_1.getLocalMediaStream)(false, true);
+    const createdAnswer = (await (0, rtcMethods_1.createAnswerSDP)(localStream, rtcMethods_1.rtcPeerConnection, data.sdp));
+    const answerSDP = {
+        sendFrom: socket.id,
+        sendTo: sendFrom,
+        type: 'answer',
+        sdp: createdAnswer,
+    };
+    (0, domControllers_1.setLocalSDPInDOM)(answerSDP.sendTo, answerSDP.type, answerSDP.sdp.sdp);
+    (0, domControllers_1.setRemoteSDPInDom)(sendFrom, type, sdp.sdp);
+    socket.emit('rtc_sdp_answer', answerSDP);
     console.log(data);
 });
 socket.on('rtc_sdp_answer_pass', function (data) {
     const { sendFrom, type, sdp } = data;
-    (0, domControllers_1.setRemoteSDP)(sendFrom, type, sdp);
-    socket.emit('rtc_sdp_answer_received_confirmation', { sendFrom: socket.id, sendTo: sendFrom, message: 'sdp-answer-received' });
-    const localICECandidates = {
+    (0, domControllers_1.setRemoteSDPInDom)(sendFrom, type, sdp.sdp);
+    socket.emit('rtc_sdp_answer_received_confirmation', {
         sendFrom: socket.id,
         sendTo: sendFrom,
-        type: 'offer',
-        ice: [],
-    };
-    socket.emit('rtc_ice_offer', localICECandidates);
+        message: 'sdp-answer-received',
+    });
     console.log(data);
 });
 socket.on('rtc_sdp_answer_received_confirmation', function (data) {
     const { sendFrom, message } = data;
     if (message === 'sdp-answer-received') {
-        const localICECandidates = {
-            sendFrom: socket.id,
-            sendTo: sendFrom,
-            type: 'answer',
-            ice: [],
-        };
-        socket.emit('rtc_ice_answer', localICECandidates);
     }
 });
 socket.on('rtc_ice_offer_pass', function (data) {
-    (0, domControllers_1.setRemotePeerICEList)(data);
+    (0, domControllers_1.setRemotePeerICEListInDOM)(data);
     console.log(data);
 });
 socket.on('rtc_ice_answer_pass', function (data) {
-    (0, domControllers_1.setRemotePeerICEList)(data);
+    (0, domControllers_1.setRemotePeerICEListInDOM)(data);
     console.log(data);
 });
 socket.on('for_me', function (data) {

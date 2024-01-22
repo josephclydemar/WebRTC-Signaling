@@ -64,13 +64,13 @@ io.on('connection', function (socket) {
     socket.on('rtc_sdp_offer', function (data: SDP): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_sdp_offer_pass', data);
-        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
+        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, `SDP-> SendFrom: ${data.sendFrom}\tType: ${data.type}`);
     });
 
     socket.on('rtc_sdp_answer', function (data: SDP): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_sdp_answer_pass', data);
-        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
+        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, `SDP-> SendFrom: ${data.sendFrom}\tType: ${data.type}`);
     });
 
     socket.on('rtc_sdp_answer_received_confirmation', function (data: any): void {
@@ -81,13 +81,13 @@ io.on('connection', function (socket) {
     socket.on('rtc_ice_offer', function (data: ICECollection): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_ice_offer_pass', data);
-        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
+        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, `ICE-> SendFrom: ${data.sendFrom}\tType: ${data.type}`, data.ice);
     });
 
     socket.on('rtc_ice_answer', function (data: ICECollection): void {
         const { sendTo } = data;
         socket.to(sendTo).emit('rtc_ice_answer_pass', data);
-        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, data);
+        console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t`, `ICE-> SendFrom: ${data.sendFrom}\tType: ${data.type}`, data.ice);
     });
 
     socket.on('disconnect', function () {

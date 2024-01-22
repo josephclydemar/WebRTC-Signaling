@@ -1,4 +1,3 @@
-import { v4 } from 'uuid';
 import { ICEServers } from './typesClient';
 
 const servers: ICEServers = {
@@ -8,9 +7,15 @@ const servers: ICEServers = {
         },
     ],
 };
+const rtcPeerConnection: RTCPeerConnection = createRTCPeerConnection();
+let iceCandidatesCollection: RTCIceCandidate[] = [];
+let isIceCandidatesGatheringComplete: boolean = false;
 
-async function createOfferSDP(localMediaStream: MediaStream): Promise<RTCSessionDescription | null> {
-    let rtcPeerConnection: RTCPeerConnection = new RTCPeerConnection(servers);
+function createRTCPeerConnection(): RTCPeerConnection {
+    return new RTCPeerConnection(servers);
+}
+
+async function createOfferSDP(localMediaStream: MediaStream, rtcPeerConnection: RTCPeerConnection): Promise<RTCSessionDescription | null> {
     let offerSDP: RTCSessionDescription;
 
     // Add local stream tracks to RTC Connection
@@ -26,15 +31,26 @@ async function createOfferSDP(localMediaStream: MediaStream): Promise<RTCSession
         // Set SDP Offer as Local Desciption
         await rtcPeerConnection.setLocalDescription(offerSDP);
 
+        rtcPeerConnection.onicecandidate = function (iceEvent: RTCPeerConnectionIceEvent): void {
+            console.log('Local ICE->', iceCandidatesCollection);
+            if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
+                iceCandidatesCollection.push(iceEvent.candidate);
+            } else {
+                isIceCandidatesGatheringComplete = true;
+            }
+        };
         return offerSDP;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return null;
     }
 }
 
-async function createAnswerSDP(localMediaStream: MediaStream, remoteOfferSDP: RTCSessionDescription): Promise<RTCSessionDescription | null> {
-    let rtcPeerConnection: RTCPeerConnection = new RTCPeerConnection(servers);
+async function createAnswerSDP(
+    localMediaStream: MediaStream,
+    rtcPeerConnection: RTCPeerConnection,
+    remoteOfferSDP: RTCSessionDescription,
+): Promise<RTCSessionDescription | null> {
     let answerSDP: RTCSessionDescription;
 
     localMediaStream.getTracks().forEach(function (track: MediaStreamTrack): void {
@@ -45,6 +61,15 @@ async function createAnswerSDP(localMediaStream: MediaStream, remoteOfferSDP: RT
         await rtcPeerConnection.setRemoteDescription(remoteOfferSDP);
         answerSDP = (await rtcPeerConnection.createAnswer({})) as RTCSessionDescription;
         await rtcPeerConnection.setLocalDescription(answerSDP);
+
+        rtcPeerConnection.onicecandidate = function (iceEvent: RTCPeerConnectionIceEvent): void {
+            console.log('Local ICE->', iceCandidatesCollection);
+            if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
+                iceCandidatesCollection.push(iceEvent.candidate);
+            } else {
+                isIceCandidatesGatheringComplete = true;
+            }
+        };
         return answerSDP;
     } catch (err) {
         console.error(err);
@@ -54,12 +79,27 @@ async function createAnswerSDP(localMediaStream: MediaStream, remoteOfferSDP: RT
 
 function collectICECandidates(rtcPeerConnection: RTCPeerConnection): Promise<RTCIceCandidate[]> {
     // Listen for Own ICE Candidates arrival and store locally
-    return new Promise(function (resolve, reject): void {
+    return new Promise(function (resolve): void {
+        // let iceCandidatesCollection: (RTCIceCandidate | null)[] = [];
         let iceCandidatesCollection: RTCIceCandidate[] = [];
         rtcPeerConnection.onicecandidate = function (iceEvent: RTCPeerConnectionIceEvent): void {
+            console.log('Local ICE->', iceEvent);
+            // if (iceCandidatesCollection.length < 3) {
+            //     if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
+            //         iceCandidatesCollection.push(iceEvent.candidate);
+            //     } else {
+            //         iceCandidatesCollection.push(null);
+            //     }
+            // } else {
+            //     iceCandidatesCollection = iceCandidatesCollection.filter(function (item: RTCIceCandidate | null): boolean {
+            //         return item !== null;
+            //     });
+            //     const x: RTCIceCandidate[] = iceCandidatesCollection as RTCIceCandidate[];
+            //     resolve(x);
+            // }
+
             if (iceEvent.candidate !== undefined && iceEvent.candidate !== null) {
                 iceCandidatesCollection.push(iceEvent.candidate);
-                // console.log('ICE -->', iceEvent);
             } else {
                 resolve(iceCandidatesCollection);
             }
@@ -67,4 +107,4 @@ function collectICECandidates(rtcPeerConnection: RTCPeerConnection): Promise<RTC
     });
 }
 
-export { createOfferSDP, createAnswerSDP, collectICECandidates };
+export { rtcPeerConnection, iceCandidatesCollection, isIceCandidatesGatheringComplete, createOfferSDP, createAnswerSDP, collectICECandidates };

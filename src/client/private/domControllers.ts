@@ -1,6 +1,6 @@
 import { SDP, ICECollection } from './typesClient';
 import { socket } from './socketListeners';
-import { createOfferSDP } from './rtcMethods';
+import { rtcPeerConnection, createOfferSDP } from './rtcMethods';
 import { getLocalMediaStream } from './userMedia';
 
 function resetOtherClientsList(otherClients: string[]): void {
@@ -12,20 +12,19 @@ function resetOtherClientsList(otherClients: string[]): void {
         let tdCall: HTMLTableCellElement = document.createElement('td');
         let callButton: HTMLButtonElement = document.createElement('button');
 
+        callButton.classList.add('my-peers');
         callButton.textContent = 'Call';
         callButton.onclick = async function (): Promise<void> {
-            let localStream: MediaStream = await getLocalMediaStream();
-            const offer: RTCSessionDescription = (await createOfferSDP(localStream)) as RTCSessionDescription;
+            let localStream: MediaStream = await getLocalMediaStream(true, false);
+            const createdOffer: RTCSessionDescription = (await createOfferSDP(localStream, rtcPeerConnection)) as RTCSessionDescription;
             const offerSDP: SDP = {
                 sendFrom: socket.id as string,
                 sendTo: otherClients[i],
                 type: 'offer',
-                sdp: offer,
+                sdp: createdOffer,
             };
             setLocalSDPInDOM(offerSDP.sendTo, offerSDP.type, offerSDP.sdp.sdp);
-            setTimeout(function (): void {
-                socket.emit('rtc_sdp_offer', offerSDP);
-            }, 2500);
+            socket.emit('rtc_sdp_offer', offerSDP);
         };
 
         tdID.textContent = otherClients[i];
@@ -60,13 +59,17 @@ function setRemotePeerICEListInDOM(remoteICE: ICECollection): void {
     remotePeerICEList.innerHTML = '';
     for (let i: number = 0; i < remoteICE.ice.length; i++) {
         let tr: HTMLTableRowElement = document.createElement('tr');
+
         let tdID: HTMLTableCellElement = document.createElement('td');
+        let tdType: HTMLTableCellElement = document.createElement('td');
         let tdICE: HTMLTableCellElement = document.createElement('td');
 
         tdID.textContent = remoteICE.sendFrom;
+        tdType.textContent = remoteICE.type;
         tdICE.textContent = remoteICE.ice[i].candidate;
 
         tr.appendChild(tdID);
+        tr.appendChild(tdType);
         tr.appendChild(tdICE);
         remotePeerICEList.appendChild(tr);
     }

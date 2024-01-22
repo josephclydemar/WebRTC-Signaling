@@ -14,3 +14,9 @@ npx mkcert create-ca
 ```
 npx mkcert create-cert
 ```
+
+<br>
+<br>
+
+**NOTE:**   
+1. <small>ICE Candidates gathering should start right after the setting of Local Description is finished.</small>
