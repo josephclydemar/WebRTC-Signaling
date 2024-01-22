@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setRemotePeerICEList = exports.setRemoteSDP = exports.setLocalSDP = exports.resetOtherClientsList = void 0;
 const uuid_1 = require("uuid");
 const socketListeners_1 = require("./socketListeners");
+const rtcMethods_1 = require("./rtcMethods");
+const userMedia_1 = require("./userMedia");
 function resetOtherClientsList(otherClients) {
     const otherClientsTableBody = document.getElementById('other-clients');
     otherClientsTableBody.innerHTML = '';
@@ -12,7 +14,9 @@ function resetOtherClientsList(otherClients) {
         let tdCall = document.createElement('td');
         let callButton = document.createElement('button');
         callButton.textContent = 'Call';
-        callButton.onclick = function () {
+        callButton.onclick = async function () {
+            let localStream = await (0, userMedia_1.getLocalMediaStream)();
+            await (0, rtcMethods_1.createOfferSDP)(localStream);
             const offerSDP = {
                 sendFrom: socketListeners_1.socket.id,
                 sendTo: otherClients[i],

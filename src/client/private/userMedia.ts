@@ -1,11 +1,20 @@
 async function getLocalMediaStream(): Promise<MediaStream> {
-    let localMediaStream: MediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    const localVideo: HTMLVideoElement = document.getElementById('local-video') as HTMLVideoElement;
+    let localMediaStream: MediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
+    });
+    localVideo.srcObject = localMediaStream;
     return localMediaStream;
 }
 
-async function setRemoteMediaStream(peerConnectionMediaStream: MediaStream): Promise<void> {
+async function setRemoteMediaStream(remotePeerMediaStream: MediaStream): Promise<void> {
+    const remoteVideo: HTMLVideoElement = document.getElementById('remote-video') as HTMLVideoElement;
     let remoteMediaStream: MediaStream = new MediaStream();
-    peerConnectionMediaStream.getTracks().forEach(function (track: MediaStreamTrack): void {
+    remotePeerMediaStream.getTracks().forEach(function (track: MediaStreamTrack): void {
         remoteMediaStream.addTrack(track);
     });
+    remoteVideo.srcObject = remoteMediaStream;
 }
+
+export { getLocalMediaStream, setRemoteMediaStream };

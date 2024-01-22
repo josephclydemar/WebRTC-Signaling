@@ -27,8 +27,7 @@ exports.socket = void 0;
 const io = __importStar(require("socket.io-client"));
 const uuid_1 = require("uuid");
 const domControllers_1 = require("./domControllers");
-const rtcMethods_1 = require("./rtcMethods");
-const DEVELOPMENT_HOSTNAME = 'http://192.168.1.19:8600';
+const DEVELOPMENT_HOSTNAME = 'https://192.168.1.19:8600';
 const socket = io.connect(DEVELOPMENT_HOSTNAME);
 exports.socket = socket;
 socket.on('rtc_sdp_offer_pass', function (data) {
@@ -49,7 +48,7 @@ socket.on('rtc_sdp_answer_pass', function (data) {
         sendFrom: socket.id,
         sendTo: sendFrom,
         type: 'offer',
-        ice: (0, rtcMethods_1.generateICECandidates)(),
+        ice: [],
     };
     socket.emit('rtc_ice_offer', localICECandidates);
     console.log(data);
@@ -61,7 +60,7 @@ socket.on('rtc_sdp_answer_received_confirmation', function (data) {
             sendFrom: socket.id,
             sendTo: sendFrom,
             type: 'answer',
-            ice: (0, rtcMethods_1.generateICECandidates)(),
+            ice: [],
         };
         socket.emit('rtc_ice_answer', localICECandidates);
     }

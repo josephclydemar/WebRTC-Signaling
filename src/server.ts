@@ -1,7 +1,9 @@
 import express, { Express, Request, Response } from 'express';
 import { Server } from 'socket.io';
+import https from 'https';
 import path from 'path';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import { format } from 'date-fns';
 import { v4 } from 'uuid';
 import { SDP, ICECollection } from './typesServer';
@@ -10,6 +12,10 @@ dotenv.config();
 
 const app: Express = express();
 const PORT: string = process.env.SERVER_PORT as string;
+// const KEY: string = process.env.HTTPS_KEY as string;
+// const CERT: string = process.env.HTTPS_CERT as string;
+const KEY: Buffer = fs.readFileSync('./certs/cert.key');
+const CERT: Buffer = fs.readFileSync('./certs/cert.crt');
 
 let clients: string[] = [];
 
@@ -30,11 +36,12 @@ app.all('*', function (req: Request, res: Response): void {
     console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t${req.protocol}  ${req.method} ${req.url}`);
 });
 
-const httpServer = app.listen(PORT, function (): void {
+const httpsServer = https.createServer({ key: KEY, cert: CERT }, app);
+httpsServer.listen(PORT, function (): void {
     console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\tListening on port ${PORT}`);
 });
 
-const io = new Server(httpServer, {
+const io = new Server(httpsServer, {
     cors: { origin: '*' },
 });
 
