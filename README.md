@@ -1,6 +1,40 @@
 # WebRTC Signaling Experiment
-### WebRTC Signaling server experiment.
+### WebRTC Signaling server experiment in TypeScript.
 
+<br>
+
+---
+
+<br>
+<br>
+
+#### Start the Development Environment:
+##### Step 1:
+```
+npm run prettier-watch
+```
+
+##### Step 2:
+```
+npm run ts-watch
+```
+
+##### Step 3:
+```
+npm run webpack
+```
+
+##### Step 4:
+```
+npm run dev
+```
+
+<br>
+<br>
+
+---
+
+<br>
 <br>
 
 #### Generate the HTTPS Key and Certificate:
@@ -15,6 +49,7 @@ npx mkcert create-ca
 npx mkcert create-cert
 ```
 
+<br>
 <br>
 <br>
 
