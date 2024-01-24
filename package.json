@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node ./dist/server.js",
     "dev": "nodemon ./dist/server.js",
+    "build": "npm install --omit-dev",
     "ts-watch": "tsc -w",
     "webpack": "webpack",
     "prettier-watch": "npx onchange \"**/*\" -- npx prettier --write .",
