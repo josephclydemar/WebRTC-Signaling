@@ -1,67 +1,64 @@
 import * as io from 'socket.io-client';
-import { v4 } from 'uuid';
 import { SDP, ICECollection } from './typesClient';
-import { resetOtherClientsList, setLocalSDP, setRemotePeerICEList, setRemoteSDP } from './domControllers';
-import { generateICECandidates } from './rtcMethods';
+import { resetOtherClientsList, setLocalSDPInDOM, setRemoteSDPInDom, setRemotePeerICEListInDOM } from './domControllers';
+import { getLocalMediaStream } from './userMedia';
+import { rtcPeerConnection, createAnswerSDP, setRemoteAnswerSDP, setRemoteICECandidates } from './rtcMethods';
 
-const DEVELOPMENT_HOSTNAME = 'http://192.168.1.19:8600';
+const DEVELOPMENT_HOSTNAME = 'https://192.168.1.2:8600';
 // const PRODUCTION_HOSTNAME = '';
 
 const socket: io.Socket = io.connect(DEVELOPMENT_HOSTNAME);
 
 // Receives an Offer from a remote peer
-socket.on('rtc_sdp_offer_pass', function (data: SDP): void {
+socket.on('rtc_sdp_offer_pass', async function (data: SDP): Promise<void> {
     const { sendFrom, type, sdp } = data;
-    const answerSDP: SDP = { sendFrom: socket.id as string, sendTo: sendFrom, type: 'answer', sdp: v4() };
-    setLocalSDP(answerSDP.sendTo, answerSDP.type, answerSDP.sdp);
-    setRemoteSDP(sendFrom, type, sdp);
-    setTimeout(function (): void {
-        socket.emit('rtc_sdp_answer', answerSDP);
-    }, 2500);
-    console.log(data);
+    let localStream: MediaStream = await getLocalMediaStream();
+    const createdAnswer: RTCSessionDescription = (await createAnswerSDP(localStream, rtcPeerConnection, data.sdp)) as RTCSessionDescription;
+    const answerSDP: SDP = {
+        sendFrom: socket.id as string,
+        sendTo: sendFrom,
+        type: 'answer',
+        sdp: createdAnswer,
+    };
+    setLocalSDPInDOM(answerSDP.sendTo, answerSDP.type, answerSDP.sdp.sdp);
+    setRemoteSDPInDom(sendFrom, type, sdp.sdp);
+
+    socket.emit('rtc_sdp_answer', answerSDP);
+    socket.emit('rtc_ready_for_remote_ice', {
+        sendFrom: socket.id,
+        sendTo: sendFrom,
+        message: 'ready-for-remote-ice',
+    });
+    // console.log(data);
 });
 
 // Receives an Answer from a remote peer
-socket.on('rtc_sdp_answer_pass', function (data: SDP): void {
+socket.on('rtc_sdp_answer_pass', async function (data: SDP): Promise<void> {
     const { sendFrom, type, sdp } = data;
-    setRemoteSDP(sendFrom, type, sdp);
-    socket.emit('rtc_sdp_answer_received_confirmation', { sendFrom: socket.id, sendTo: sendFrom, message: 'sdp-answer-received' });
-    const localICECandidates: ICECollection = {
-        sendFrom: socket.id as string,
+    await setRemoteAnswerSDP(rtcPeerConnection, sdp);
+    setRemoteSDPInDom(sendFrom, type, sdp.sdp);
+    socket.emit('rtc_ready_for_remote_ice', {
+        sendFrom: socket.id,
         sendTo: sendFrom,
-        type: 'offer',
-        ice: generateICECandidates(),
-    };
-    socket.emit('rtc_ice_offer', localICECandidates);
-    console.log(data);
-});
-
-// Receive offerer's confirmation that answer SDP is received
-socket.on('rtc_sdp_answer_received_confirmation', function (data: any): void {
-    const { sendFrom, message } = data;
-    if (message === 'sdp-answer-received') {
-        const localICECandidates: ICECollection = {
-            sendFrom: socket.id as string,
-            sendTo: sendFrom,
-            type: 'answer',
-            ice: generateICECandidates(),
-        };
-        socket.emit('rtc_ice_answer', localICECandidates);
-    }
+        message: 'ready-for-remote-ice',
+    });
+    // console.log(data);
 });
 
 // Receive ICE Candidates from offerer remote peer
-socket.on('rtc_ice_offer_pass', function (data: ICECollection): void {
+socket.on('rtc_ice_offer_pass', async function (data: ICECollection): Promise<void> {
     // const { sendFrom, ice } = data;
-    setRemotePeerICEList(data);
-    console.log(data);
+    await setRemoteICECandidates(rtcPeerConnection, data.ice);
+    setRemotePeerICEListInDOM(data);
+    console.log('REMOTE ICE ----->', data);
 });
 
 // Receive ICE Candidates from answerer remote peer
-socket.on('rtc_ice_answer_pass', function (data: ICECollection): void {
+socket.on('rtc_ice_answer_pass', async function (data: ICECollection): Promise<void> {
     // const { sendFrom, ice } = data;
-    setRemotePeerICEList(data);
-    console.log(data);
+    setRemotePeerICEListInDOM(data);
+    await setRemoteICECandidates(rtcPeerConnection, data.ice);
+    console.log('REMOTE ICE ----->', data);
 });
 
 socket.on('for_me', function (data: string[]): void {

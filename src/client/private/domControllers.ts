@@ -1,6 +1,7 @@
-import { v4 } from 'uuid';
 import { SDP, ICECollection } from './typesClient';
 import { socket } from './socketListeners';
+import { rtcPeerConnection, createOfferSDP } from './rtcMethods';
+import { getLocalMediaStream } from './userMedia';
 
 function resetOtherClientsList(otherClients: string[]): void {
     const otherClientsTableBody: HTMLTableSectionElement = document.getElementById('other-clients') as HTMLTableSectionElement;
@@ -11,18 +12,19 @@ function resetOtherClientsList(otherClients: string[]): void {
         let tdCall: HTMLTableCellElement = document.createElement('td');
         let callButton: HTMLButtonElement = document.createElement('button');
 
+        callButton.classList.add('my-peers');
         callButton.textContent = 'Call';
-        callButton.onclick = function (): void {
+        callButton.onclick = async function (): Promise<void> {
+            let localStream: MediaStream = await getLocalMediaStream();
+            const createdOffer: RTCSessionDescription = (await createOfferSDP(localStream, rtcPeerConnection)) as RTCSessionDescription;
             const offerSDP: SDP = {
                 sendFrom: socket.id as string,
                 sendTo: otherClients[i],
                 type: 'offer',
-                sdp: v4(),
+                sdp: createdOffer,
             };
-            setLocalSDP(offerSDP.sendTo, offerSDP.type, offerSDP.sdp);
-            setTimeout(function (): void {
-                socket.emit('rtc_sdp_offer', offerSDP);
-            }, 2500);
+            setLocalSDPInDOM(offerSDP.sendTo, offerSDP.type, offerSDP.sdp.sdp);
+            socket.emit('rtc_sdp_offer', offerSDP);
         };
 
         tdID.textContent = otherClients[i];
@@ -34,7 +36,7 @@ function resetOtherClientsList(otherClients: string[]): void {
     }
 }
 
-function setRemoteSDP(sendFrom: string, type: string, sdp: string): void {
+function setRemoteSDPInDom(sendFrom: string, type: string, sdp: string): void {
     const receivedSDP: HTMLHeadingElement = document.getElementById('sdp-remote') as HTMLHeadingElement;
     const SDPSender: HTMLHeadingElement = document.getElementById('sdp-remote-sender') as HTMLHeadingElement;
     const SDPType: HTMLHeadingElement = document.getElementById('sdp-remote-type') as HTMLHeadingElement;
@@ -43,7 +45,7 @@ function setRemoteSDP(sendFrom: string, type: string, sdp: string): void {
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
 
-function setLocalSDP(sendTo: string, type: string, sdp: string): void {
+function setLocalSDPInDOM(sendTo: string, type: string, sdp: string): void {
     const receivedSDP: HTMLHeadingElement = document.getElementById('sdp-local') as HTMLHeadingElement;
     const SDPSender: HTMLHeadingElement = document.getElementById('sdp-local-sender') as HTMLHeadingElement;
     const SDPType: HTMLHeadingElement = document.getElementById('sdp-local-type') as HTMLHeadingElement;
@@ -52,21 +54,25 @@ function setLocalSDP(sendTo: string, type: string, sdp: string): void {
     receivedSDP.textContent = `SDP: ${sdp}`;
 }
 
-function setRemotePeerICEList(remoteICE: ICECollection): void {
+function setRemotePeerICEListInDOM(remoteICE: ICECollection): void {
     const remotePeerICEList: HTMLTableSectionElement = document.getElementById('remote-peer-ice') as HTMLTableSectionElement;
     remotePeerICEList.innerHTML = '';
     for (let i: number = 0; i < remoteICE.ice.length; i++) {
         let tr: HTMLTableRowElement = document.createElement('tr');
+
         let tdID: HTMLTableCellElement = document.createElement('td');
+        let tdType: HTMLTableCellElement = document.createElement('td');
         let tdICE: HTMLTableCellElement = document.createElement('td');
 
         tdID.textContent = remoteICE.sendFrom;
-        tdICE.textContent = remoteICE.ice[i];
+        tdType.textContent = remoteICE.type;
+        tdICE.textContent = remoteICE.ice[i].candidate;
 
         tr.appendChild(tdID);
+        tr.appendChild(tdType);
         tr.appendChild(tdICE);
         remotePeerICEList.appendChild(tr);
     }
 }
 
-export { resetOtherClientsList, setLocalSDP, setRemoteSDP, setRemotePeerICEList };
+export { resetOtherClientsList, setLocalSDPInDOM, setRemoteSDPInDom, setRemotePeerICEListInDOM };

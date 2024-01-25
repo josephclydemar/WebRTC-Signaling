@@ -2,14 +2,20 @@ type SDP = {
     sendFrom: string;
     sendTo: string;
     type: string;
-    sdp: string;
+    sdp: RTCSessionDescription;
 };
 
 type ICECollection = {
     sendFrom: string;
     sendTo: string;
     type: string;
-    ice: string[];
+    ice: RTCIceCandidate[];
 };
 
-export { SDP, ICECollection };
+type ConfirmReadyForICE = {
+    sendFrom: string;
+    sendTo: string;
+    message: string;
+};
+
+export { SDP, ICECollection, ConfirmReadyForICE };
