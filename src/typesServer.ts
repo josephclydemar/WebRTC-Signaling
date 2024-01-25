@@ -12,4 +12,10 @@ type ICECollection = {
     ice: RTCIceCandidate[];
 };
 
-export { SDP, ICECollection };
+type ConfirmReadyForICE = {
+    sendFrom: string;
+    sendTo: string;
+    message: string;
+};
+
+export { SDP, ICECollection, ConfirmReadyForICE };
