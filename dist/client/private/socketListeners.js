@@ -33,7 +33,7 @@ const socket = io.connect(DEVELOPMENT_HOSTNAME);
 exports.socket = socket;
 socket.on('rtc_sdp_offer_pass', async function (data) {
     const { sendFrom, type, sdp } = data;
-    let localStream = await (0, userMedia_1.getLocalMediaStream)(false, true);
+    let localStream = await (0, userMedia_1.getLocalMediaStream)();
     const createdAnswer = (await (0, rtcMethods_1.createAnswerSDP)(localStream, rtcMethods_1.rtcPeerConnection, data.sdp));
     const answerSDP = {
         sendFrom: socket.id,
@@ -44,30 +44,31 @@ socket.on('rtc_sdp_offer_pass', async function (data) {
     (0, domControllers_1.setLocalSDPInDOM)(answerSDP.sendTo, answerSDP.type, answerSDP.sdp.sdp);
     (0, domControllers_1.setRemoteSDPInDom)(sendFrom, type, sdp.sdp);
     socket.emit('rtc_sdp_answer', answerSDP);
-    console.log(data);
-});
-socket.on('rtc_sdp_answer_pass', function (data) {
-    const { sendFrom, type, sdp } = data;
-    (0, domControllers_1.setRemoteSDPInDom)(sendFrom, type, sdp.sdp);
-    socket.emit('rtc_sdp_answer_received_confirmation', {
+    socket.emit('rtc_ready_for_remote_ice', {
         sendFrom: socket.id,
         sendTo: sendFrom,
-        message: 'sdp-answer-received',
+        message: 'ready-for-remote-ice',
     });
-    console.log(data);
 });
-socket.on('rtc_sdp_answer_received_confirmation', function (data) {
-    const { sendFrom, message } = data;
-    if (message === 'sdp-answer-received') {
-    }
+socket.on('rtc_sdp_answer_pass', async function (data) {
+    const { sendFrom, type, sdp } = data;
+    await (0, rtcMethods_1.setRemoteAnswerSDP)(rtcMethods_1.rtcPeerConnection, sdp);
+    (0, domControllers_1.setRemoteSDPInDom)(sendFrom, type, sdp.sdp);
+    socket.emit('rtc_ready_for_remote_ice', {
+        sendFrom: socket.id,
+        sendTo: sendFrom,
+        message: 'ready-for-remote-ice',
+    });
 });
-socket.on('rtc_ice_offer_pass', function (data) {
+socket.on('rtc_ice_offer_pass', async function (data) {
+    await (0, rtcMethods_1.setRemoteICECandidates)(rtcMethods_1.rtcPeerConnection, data.ice);
     (0, domControllers_1.setRemotePeerICEListInDOM)(data);
-    console.log(data);
+    console.log('REMOTE ICE ----->', data);
 });
-socket.on('rtc_ice_answer_pass', function (data) {
+socket.on('rtc_ice_answer_pass', async function (data) {
     (0, domControllers_1.setRemotePeerICEListInDOM)(data);
-    console.log(data);
+    await (0, rtcMethods_1.setRemoteICECandidates)(rtcMethods_1.rtcPeerConnection, data.ice);
+    console.log('REMOTE ICE ----->', data);
 });
 socket.on('for_me', function (data) {
     (0, domControllers_1.resetOtherClientsList)(data);

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setRemoteMediaStream = exports.getLocalMediaStream = void 0;
-async function getLocalMediaStream(getVideo, getAudio) {
+async function getLocalMediaStream() {
     const localVideo = document.getElementById('local-video');
     let localMediaStream = await navigator.mediaDevices.getUserMedia({
-        video: getVideo,
-        audio: getAudio,
+        video: true,
+        audio: true,
     });
     localVideo.srcObject = localMediaStream;
     return localMediaStream;

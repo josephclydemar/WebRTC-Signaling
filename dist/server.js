@@ -53,9 +53,9 @@ io.on('connection', function (socket) {
         socket.to(sendTo).emit('rtc_sdp_answer_pass', data);
         console.log(`${(0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${(0, uuid_1.v4)()}\t`, `SDP-> SendFrom: ${data.sendFrom}\tType: ${data.type}`);
     });
-    socket.on('rtc_sdp_answer_received_confirmation', function (data) {
+    socket.on('rtc_ready_for_remote_ice', function (data) {
         const { sendTo } = data;
-        socket.to(sendTo).emit('rtc_sdp_answer_received_confirmation', data);
+        socket.to(sendTo).emit('rtc_ready_for_remote_ice_pass', data);
     });
     socket.on('rtc_ice_offer', function (data) {
         const { sendTo } = data;
