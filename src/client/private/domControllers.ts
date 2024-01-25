@@ -15,7 +15,7 @@ function resetOtherClientsList(otherClients: string[]): void {
         callButton.classList.add('my-peers');
         callButton.textContent = 'Call';
         callButton.onclick = async function (): Promise<void> {
-            let localStream: MediaStream = await getLocalMediaStream(true, false);
+            let localStream: MediaStream = await getLocalMediaStream();
             const createdOffer: RTCSessionDescription = (await createOfferSDP(localStream, rtcPeerConnection)) as RTCSessionDescription;
             const offerSDP: SDP = {
                 sendFrom: socket.id as string,
