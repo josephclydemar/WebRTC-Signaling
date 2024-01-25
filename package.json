@@ -1,5 +1,5 @@
 {
-  "name": "socketio-promise",
+  "name": "webrtc-signaling-experiment",
   "version": "1.0.0",
   "description": "Promises Experiment",
   "main": "server.js",
