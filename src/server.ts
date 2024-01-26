@@ -33,8 +33,7 @@ app.all('*', function (req: Request, res: Response): void {
     console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\t${req.protocol}  ${req.method} ${req.url}`);
 });
 
-
-if(NODE_ENVIRONMENT === 'development') {
+if (NODE_ENVIRONMENT === 'development') {
     const KEY: Buffer = fs.readFileSync('./certs/cert.key');
     const CERT: Buffer = fs.readFileSync('./certs/cert.crt');
     const httpsServer = https.createServer({ key: KEY, cert: CERT }, app);
@@ -99,7 +98,7 @@ if(NODE_ENVIRONMENT === 'development') {
             socket.broadcast.emit('client_disconnect', clients);
         });
     });
-} else if(NODE_ENVIRONMENT === 'production') {
+} else if (NODE_ENVIRONMENT === 'production') {
     const httpServer = app.listen(PORT, function (): void {
         console.log(`${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}   ${v4()}\tListening on port ${PORT}`);
     });
@@ -161,5 +160,4 @@ if(NODE_ENVIRONMENT === 'development') {
             socket.broadcast.emit('client_disconnect', clients);
         });
     });
-
 }

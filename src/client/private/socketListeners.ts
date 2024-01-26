@@ -4,7 +4,8 @@ import { resetOtherClientsList, setLocalSDPInDOM, setRemoteSDPInDom, setRemotePe
 import { getLocalMediaStream } from './userMedia';
 import { rtcPeerConnection, createAnswerSDP, setRemoteAnswerSDP, setRemoteICECandidates } from './rtcMethods';
 
-const DEVELOPMENT_HOSTNAME = 'https://192.168.1.2:8600';
+// const DEVELOPMENT_HOSTNAME = 'https://192.168.1.2:8600';
+const DEVELOPMENT_HOSTNAME = 'https://rtc-signaling-experiment.onrender.com';
 // const PRODUCTION_HOSTNAME = '';
 
 const socket: io.Socket = io.connect(DEVELOPMENT_HOSTNAME);
