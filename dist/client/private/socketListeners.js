@@ -28,7 +28,7 @@ const io = __importStar(require("socket.io-client"));
 const domControllers_1 = require("./domControllers");
 const userMedia_1 = require("./userMedia");
 const rtcMethods_1 = require("./rtcMethods");
-const DEVELOPMENT_HOSTNAME = 'https://192.168.1.2:8600';
+const DEVELOPMENT_HOSTNAME = 'https://rtc-signaling-experiment.onrender.com';
 const socket = io.connect(DEVELOPMENT_HOSTNAME);
 exports.socket = socket;
 socket.on('rtc_sdp_offer_pass', async function (data) {
