@@ -1,5 +1,5 @@
 # WebRTC Signaling Experiment
-### WebRTC Signaling server experiment in TypeScript.
+### WebRTC Signaling server in TypeScript.
 
 <br>
 
